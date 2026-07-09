@@ -12,29 +12,34 @@ import { useRollStore } from "@/store/useRollStore";
 import { THEMES } from "@/data/themes";
 import ThemeSelector from "@/components/ThemeSelector";
 import ResultSlot from "@/components/ResultSlot";
+import EndingSlot from "@/components/EndingSlot";
 import HistoryDrawer from "@/components/HistoryDrawer";
 import ConfigPanel from "@/components/ConfigPanel";
+import LimitConfigPanel from "@/components/LimitConfigPanel";
+import LimitModule from "@/components/LimitModule";
 import { cn } from "@/lib/utils";
 
 export default function RollPage() {
   const result = useRollStore((s) => s.result);
   const isRolling = useRollStore((s) => s.isRolling);
   const lockedSlots = useRollStore((s) => s.lockedSlots);
+  const endingLocked = useRollStore((s) => s.endingLocked);
   const pinnedThemes = useRollStore((s) => s.pinnedThemes);
   const toggles = useRollStore((s) => s.toggles);
   const fixedValues = useRollStore((s) => s.fixedValues);
   const configs = useRollStore((s) => s.configs);
-  const roll = useRollStore((s) => s.roll);
+  const endingEnabled = useRollStore((s) => s.endingEnabled);
+  const rollMain = useRollStore((s) => s.rollMain);
   const toggleHistory = useRollStore((s) => s.toggleHistory);
   const toggleConfig = useRollStore((s) => s.toggleConfig);
   const historyCount = useRollStore((s) => s.history.length);
 
-  // 当前展示用的主题：有结果用结果主题；否则用固定主题（便于初始态展示固定值）
+  // 当前展示用的主题：有结果用结果主题；否则用固定主题
   const activeTheme = result?.theme ?? fixedValues.theme;
   const accent = activeTheme.accent;
   const hasResult = !!result;
 
-  // 滚动时各槽位的候选文字池（仅对开启随机的元素有意义）
+  // 滚动时各槽位的候选文字池
   const themePool = (pinnedThemes.length > 0 ? pinnedThemes : THEMES).map((t) => t.name);
   const difficultyPool = Array.from(
     { length: activeTheme.difficultyMax + 1 },
@@ -47,31 +52,36 @@ export default function RollPage() {
   const recruitmentPool = activeCfg?.enabledRecruitments?.length
     ? activeCfg.enabledRecruitments
     : activeTheme.recruitments;
+  // 结局滚动候选文字池
+  const endingPool = activeCfg?.enabledEndings?.length
+    ? activeTheme.endings
+        .filter((e) => activeCfg.enabledEndings.includes(e.index))
+        .map((e) => e.name)
+    : activeTheme.endings.map((e) => e.name);
 
-  // 每个元素的展示值：开启随机 → 用 result；关闭 → 用 fixedValues
-  const themeDisplay = toggles.theme
-    ? result?.theme.name ?? ""
-    : fixedValues.theme.name;
-  const difficultyDisplay = toggles.difficulty
-    ? result
-      ? `${result.theme.difficultyLabel}·${result.difficulty}`
-      : ""
-    : `${fixedValues.theme.difficultyLabel}·${fixedValues.difficulty}`;
-  const squadDisplay = toggles.squad ? result?.squad ?? "" : fixedValues.squad;
-  const recruitmentDisplay = toggles.recruitment
-    ? result?.recruitment ?? ""
-    : fixedValues.recruitment;
+  // 每个元素的展示值（仅开启随机的元素才显示）
+  const themeDisplay = result?.theme.name ?? "";
+  const difficultyDisplay = result
+    ? `${result.theme.difficultyLabel}·${result.difficulty}`
+    : "";
+  const squadDisplay = result?.squad ?? "";
+  const recruitmentDisplay = result?.recruitment ?? "";
 
-  // 提示文案：参与随机的元素
-  const enabledList = (["theme", "difficulty", "squad", "recruitment"] as const).filter(
-    (k) => toggles[k],
-  );
+  // 提示文案：参与随机的元素（含结局）
   const enabledNames: Record<string, string> = {
     theme: "主题",
     difficulty: "难度",
     squad: "分队",
     recruitment: "招募",
+    ending: "结局",
   };
+  const enabledList = [
+    ...(toggles.theme ? ["theme"] : []),
+    ...(toggles.difficulty ? ["difficulty"] : []),
+    ...(toggles.squad ? ["squad"] : []),
+    ...(toggles.recruitment ? ["recruitment"] : []),
+    ...(endingEnabled ? ["ending"] : []),
+  ];
 
   return (
     <div className="terminal-bg noise relative min-h-screen w-full overflow-x-hidden">
@@ -138,7 +148,7 @@ export default function RollPage() {
         {/* 抽签控制台 */}
         <section className="mb-8 flex flex-col items-center">
           <button
-            onClick={roll}
+            onClick={rollMain}
             disabled={isRolling}
             className={cn(
               "clip-corner group relative flex items-center gap-3 border-2 px-12 py-4 font-display text-lg font-bold tracking-wider transition-all",
@@ -160,7 +170,7 @@ export default function RollPage() {
               </>
             )}
           </button>
-          <div className="mt-4 flex items-center gap-3 font-mono text-[11px] tracking-wider text-muted">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3 font-mono text-[11px] tracking-wider text-muted">
             <span className="diamond bg-amber/60" />
             <span>
               ROLL: {enabledList.map((k) => enabledNames[k]).join(" / ")}
@@ -174,56 +184,87 @@ export default function RollPage() {
           </div>
         </section>
 
-        {/* 结果展示区：四宫格 */}
+        {/* 结果展示区：仅显示开启随机的元素 */}
         <section className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <ResultSlot
-            label="主题"
-            sublabel="THEME"
-            icon={<MapPinned className="h-4 w-4" />}
-            isRolling={isRolling}
-            isLocked={lockedSlots.theme}
-            displayValue={themeDisplay}
-            cyclingOptions={themePool}
-            accent={accent}
-            hasResult={hasResult}
-            fixed={!toggles.theme}
-          />
-          <ResultSlot
-            label="难度"
-            sublabel="DIFFICULTY"
-            icon={<Gauge className="h-4 w-4" />}
-            isRolling={isRolling}
-            isLocked={lockedSlots.difficulty}
-            displayValue={difficultyDisplay}
-            cyclingOptions={difficultyPool}
-            accent={accent}
-            hasResult={hasResult}
-            fixed={!toggles.difficulty}
-          />
-          <ResultSlot
-            label="分队"
-            sublabel="SQUAD"
-            icon={<Users className="h-4 w-4" />}
-            isRolling={isRolling}
-            isLocked={lockedSlots.squad}
-            displayValue={squadDisplay}
-            cyclingOptions={squadPool}
-            accent={accent}
-            hasResult={hasResult}
-            fixed={!toggles.squad}
-          />
-          <ResultSlot
-            label="招募组合"
-            sublabel="RECRUIT"
-            icon={<Sparkles className="h-4 w-4" />}
-            isRolling={isRolling}
-            isLocked={lockedSlots.recruitment}
-            displayValue={recruitmentDisplay}
-            cyclingOptions={recruitmentPool}
-            accent={accent}
-            hasResult={hasResult}
-            fixed={!toggles.recruitment}
-          />
+          {toggles.theme && (
+            <ResultSlot
+              label="主题"
+              sublabel="THEME"
+              icon={<MapPinned className="h-4 w-4" />}
+              isRolling={isRolling}
+              isLocked={lockedSlots.theme}
+              displayValue={themeDisplay}
+              cyclingOptions={themePool}
+              accent={accent}
+              hasResult={hasResult}
+            />
+          )}
+          {toggles.difficulty && (
+            <ResultSlot
+              label="难度"
+              sublabel="DIFFICULTY"
+              icon={<Gauge className="h-4 w-4" />}
+              isRolling={isRolling}
+              isLocked={lockedSlots.difficulty}
+              displayValue={difficultyDisplay}
+              cyclingOptions={difficultyPool}
+              accent={accent}
+              hasResult={hasResult}
+            />
+          )}
+          {toggles.squad && (
+            <ResultSlot
+              label="分队"
+              sublabel="SQUAD"
+              icon={<Users className="h-4 w-4" />}
+              isRolling={isRolling}
+              isLocked={lockedSlots.squad}
+              displayValue={squadDisplay}
+              cyclingOptions={squadPool}
+              accent={accent}
+              hasResult={hasResult}
+            />
+          )}
+          {toggles.recruitment && (
+            <ResultSlot
+              label="招募组合"
+              sublabel="RECRUIT"
+              icon={<Sparkles className="h-4 w-4" />}
+              isRolling={isRolling}
+              isLocked={lockedSlots.recruitment}
+              displayValue={recruitmentDisplay}
+              cyclingOptions={recruitmentPool}
+              accent={accent}
+              hasResult={hasResult}
+            />
+          )}
+        </section>
+
+        {/* 随机结局：独立展示区，仅开启时显示 */}
+        {endingEnabled && (
+          <section className="mb-8">
+            <div className="mb-3 flex items-center gap-2 font-mono text-[10px] tracking-[0.25em] text-muted">
+              <span className="h-px w-5 bg-edge" />
+              <span>RANDOM ENDING // 随机结局</span>
+            </div>
+            <EndingSlot
+              isRolling={isRolling}
+              isLocked={endingLocked}
+              endings={result?.endings ?? []}
+              cyclingOptions={endingPool}
+              accent={accent}
+              hasResult={hasResult}
+            />
+          </section>
+        )}
+
+        {/* 自限模块：位于主结果下方，独立展示禁用职业，独立配置与抽签 */}
+        <section className="mb-8">
+          <div className="mb-3 flex items-center gap-2 font-mono text-[10px] tracking-[0.25em] text-muted">
+            <span className="h-px w-5 bg-edge" />
+            <span>SELF LIMIT MODULE // 自限模块</span>
+          </div>
+          <LimitModule accent={accent} />
         </section>
 
         {/* 底部信息条 */}
@@ -239,14 +280,17 @@ export default function RollPage() {
               <span>{THEMES.reduce((n, t) => n + t.squads.length, 0)}SQ</span>
               <span className="text-edge">/</span>
               <span>{THEMES.reduce((n, t) => n + t.recruitments.length, 0)}RC</span>
+              <span className="text-edge">/</span>
+              <span>{THEMES.reduce((n, t) => n + t.endings.length, 0)}ED</span>
             </span>
-            <span className="text-edge">v1.2 · ROGUELIKE TERMINAL</span>
+            <span className="text-edge">v1.3 · ROGUELIKE TERMINAL</span>
           </div>
         </footer>
       </div>
 
       <HistoryDrawer />
       <ConfigPanel />
+      <LimitConfigPanel />
     </div>
   );
 }

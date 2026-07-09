@@ -6,11 +6,34 @@ export interface Theme {
   difficultyMax: number; // 难度上限，如 18
   squads: string[]; // 分队列表
   recruitments: string[]; // 初始招募组合列表
+  endings: Ending[]; // 结局列表
   accent: string; // 主题强调色
   accentSoft: string; // 主题强调色（柔光）
   tagline: string; // 主题标语
   index: string; // 主题编号
 }
+
+// 结局数据结构
+export interface Ending {
+  index: number; // 结局编号 1~5
+  name: string; // 结局名称
+  // 同组结局互斥（同组最多抽 1 个）；undefined 表示独立可多选
+  exclusiveGroup?: string;
+}
+
+// 明日方舟干员职业（自限模块用）
+export const PROFESSIONS = [
+  "先锋",
+  "近卫",
+  "重装",
+  "狙击",
+  "术师",
+  "医疗",
+  "辅助",
+  "特种",
+] as const;
+
+export type Profession = (typeof PROFESSIONS)[number];
 
 // 单次抽签结果
 export interface RollResult {
@@ -18,6 +41,13 @@ export interface RollResult {
   difficulty: number; // 0~difficultyMax
   squad: string;
   recruitment: string;
+  endings: Ending[]; // 本次抽中的结局链（可连打）
+  rolledAt: number; // 时间戳
+}
+
+// 自限模块结果：本次禁用的职业列表
+export interface LimitResult {
+  bannedProfessions: Profession[]; // 被禁用的职业
   rolledAt: number; // 时间戳
 }
 
@@ -42,4 +72,15 @@ export interface ThemeConfig {
   difficultyMax: number; // 难度上限
   enabledSquads: string[]; // 参与随机的分队子集
   enabledRecruitments: string[]; // 参与随机的招募子集
+  enabledEndings: number[]; // 参与随机的结局 index 列表
 }
+
+// 自限模块配置
+export interface LimitConfig {
+  enabled: boolean; // 是否启用自限
+  minBans: number; // 最少禁用职业数
+  maxBans: number; // 最多禁用职业数
+  // 允许被禁用的职业池（从这些职业中随机选 n 个禁用）
+  pool: Profession[];
+}
+

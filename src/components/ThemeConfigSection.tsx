@@ -22,6 +22,7 @@ export default function ThemeConfigSection({ theme }: Props) {
       difficultyMax: theme.difficultyMax,
       enabledSquads: [...theme.squads],
       enabledRecruitments: [...theme.recruitments],
+      enabledEndings: theme.endings.map((e) => e.index),
     };
 
   // 分队多选切换
@@ -38,6 +39,13 @@ export default function ThemeConfigSection({ theme }: Props) {
       ? cfg.enabledRecruitments.filter((r) => r !== rec)
       : [...cfg.enabledRecruitments, rec];
     update(theme.id, { enabledRecruitments: next });
+  };
+  const toggleEnding = (idx: number) => {
+    const exists = cfg.enabledEndings.includes(idx);
+    const next = exists
+      ? cfg.enabledEndings.filter((i) => i !== idx)
+      : [...cfg.enabledEndings, idx];
+    update(theme.id, { enabledEndings: next });
   };
 
   return (
@@ -58,7 +66,7 @@ export default function ThemeConfigSection({ theme }: Props) {
             {theme.name}
           </span>
           <span className="font-mono text-[10px] text-muted">
-            难度 {cfg.difficultyMin}~{cfg.difficultyMax} · 分队 {cfg.enabledSquads.length}/{theme.squads.length} · 招募 {cfg.enabledRecruitments.length}/{theme.recruitments.length}
+            难度 {cfg.difficultyMin}~{cfg.difficultyMax} · 分队 {cfg.enabledSquads.length}/{theme.squads.length} · 招募 {cfg.enabledRecruitments.length}/{theme.recruitments.length} · 结局 {cfg.enabledEndings.length}/{theme.endings.length}
           </span>
         </div>
         <ChevronDown
@@ -200,6 +208,59 @@ export default function ThemeConfigSection({ theme }: Props) {
                     style={on ? { background: theme.accent } : undefined}
                   >
                     {rec}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 结局多选 */}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <span className="font-mono text-[11px] tracking-wider text-muted">
+                参与随机的结局
+              </span>
+              <button
+                onClick={() =>
+                  update(theme.id, {
+                    enabledEndings:
+                      cfg.enabledEndings.length === theme.endings.length
+                        ? []
+                        : theme.endings.map((e) => e.index),
+                  })
+                }
+                className="font-mono text-[10px] text-amber/80 hover:text-amber"
+              >
+                {cfg.enabledEndings.length === theme.endings.length ? "全不选" : "全选"}
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {theme.endings.map((ending) => {
+                const on = cfg.enabledEndings.includes(ending.index);
+                // 显示互斥信息
+                const groupLabel = ending.exclusiveGroup
+                  ? ending.exclusiveGroup === "A"
+                    ? "1/2 必选"
+                    : "3/4互斥"
+                  : "独立";
+                return (
+                  <button
+                    key={ending.index}
+                    onClick={() => toggleEnding(ending.index)}
+                    className={cn(
+                      "border px-2 py-1.5 text-left transition-all",
+                      on
+                        ? "border-transparent text-void"
+                        : "border-edge text-muted hover:border-amber/40",
+                    )}
+                    style={on ? { background: theme.accent } : undefined}
+                  >
+                    <div className="font-sans text-[11px] font-bold">
+                      {ending.index}. {ending.name}
+                    </div>
+                    <div className="font-mono text-[8px] tracking-wider opacity-70">
+                      {groupLabel}
+                    </div>
                   </button>
                 );
               })}

@@ -1,6 +1,7 @@
 import type { Theme } from "@/types";
 
 // 明日方舟集成战略五大主题数据（来源：info.txt）
+// 结局互斥规则：1/2 互斥(A组)，3/4 除萨米外互斥(B组)，5 独立
 export const THEMES: Theme[] = [
   {
     id: "phantom",
@@ -24,6 +25,12 @@ export const THEMES: Theme[] = [
       "高规格分队",
     ],
     recruitments: ["先手必胜", "稳扎稳打", "取长补短", "随心所欲"],
+    endings: [
+      { index: 1, name: "舞会终场", exclusiveGroup: "A" },
+      { index: 2, name: "滑稽喜剧", exclusiveGroup: "A" },
+      { index: 3, name: "盛大揭幕", exclusiveGroup: "B" },
+      { index: 4, name: "沉默之章", exclusiveGroup: "B" },
+    ],
   },
   {
     id: "mizuki",
@@ -50,6 +57,12 @@ export const THEMES: Theme[] = [
       "以人为本分队",
     ],
     recruitments: ["先手必胜", "稳扎稳打", "取长补短", "随心所欲"],
+    endings: [
+      { index: 1, name: "平凡即是喜乐", exclusiveGroup: "A" },
+      { index: 2, name: "静谧时代", exclusiveGroup: "A" },
+      { index: 3, name: "息潮的代价", exclusiveGroup: "B" },
+      { index: 4, name: "如星空般深蓝", exclusiveGroup: "B" },
+    ],
   },
   {
     id: "frostbound",
@@ -76,6 +89,13 @@ export const THEMES: Theme[] = [
       "特训分队",
     ],
     recruitments: ["先手必胜", "稳扎稳打", "取长补短", "随心所欲"],
+    // 萨米：3/4 不互斥，均为独立
+    endings: [
+      { index: 1, name: "越过群山", exclusiveGroup: "A" },
+      { index: 2, name: "直至冬夜降临", exclusiveGroup: "A" },
+      { index: 3, name: "自深处的一瞥" },
+      { index: 4, name: "终始" },
+    ],
   },
   {
     id: "sarkaz",
@@ -106,6 +126,13 @@ export const THEMES: Theme[] = [
       "专业人士分队",
     ],
     recruitments: ["先手必胜", "稳扎稳打", "取长补短", "随心所欲"],
+    endings: [
+      { index: 1, name: "憧憬未来", exclusiveGroup: "A" },
+      { index: 2, name: "双王记", exclusiveGroup: "A" },
+      { index: 3, name: "天使之城", exclusiveGroup: "B" },
+      { index: 4, name: "遁入阇那", exclusiveGroup: "B" },
+      { index: 5, name: "无瑕之日" },
+    ],
   },
   {
     id: "sui",
@@ -144,6 +171,13 @@ export const THEMES: Theme[] = [
       "随心所欲",
       "灵活部署",
       "坚不可摧",
+    ],
+    endings: [
+      { index: 1, name: "依律镇抚", exclusiveGroup: "A" },
+      { index: 2, name: "长卷留痕", exclusiveGroup: "A" },
+      { index: 3, name: "黑白入玄", exclusiveGroup: "B" },
+      { index: 4, name: "无中生有", exclusiveGroup: "B" },
+      { index: 5, name: "落子无悔" },
     ],
   },
 ];

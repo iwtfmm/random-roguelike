@@ -90,6 +90,30 @@ export default function HistoryDrawer() {
                       <div className="text-chalk">{r.recruitment}</div>
                     </div>
                   </div>
+                  {r.endings.length > 0 && (
+                    <div className="mt-2 border-t border-edge/40 pt-2">
+                      <div className="mb-1 font-mono text-[10px] text-muted">结局</div>
+                      <div className="flex flex-wrap items-center gap-1">
+                        {r.endings.map((e, i) => (
+                          <span key={e.index} className="flex items-center gap-1">
+                            <span
+                              className="border px-1.5 py-0.5 font-display text-[10px] font-bold"
+                              style={{
+                                borderColor: `${r.theme.accent}88`,
+                                color: "#e8e8e8",
+                                background: `${r.theme.accent}1a`,
+                              }}
+                            >
+                              {e.index}. {e.name}
+                            </span>
+                            {i < r.endings.length - 1 && (
+                              <span style={{ color: r.theme.accent }} className="text-[10px]">→</span>
+                            )}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
