@@ -1,0 +1,165 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: "Noto Sans SC", system-ui, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: #070a0f;
+  color: #d4d4d4;
+  overflow-x: hidden;
+}
+
+/* 战术终端背景：网格 + 渐变 + 暗角 */
+.terminal-bg {
+  background-color: #070a0f;
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(58, 143, 183, 0.08), transparent 55%),
+    radial-gradient(circle at 50% 100%, rgba(200, 164, 92, 0.06), transparent 55%),
+    linear-gradient(rgba(36, 48, 64, 0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(36, 48, 64, 0.22) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  background-attachment: fixed;
+}
+
+/* 噪点纹理叠加 */
+.noise::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* 切角面板：双对角切（明日方舟常见） */
+.clip-corner {
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+
+/* 单角切：仅右上角（明日方舟卡片特征） */
+.clip-ark {
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+}
+
+.clip-tab {
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 100%, 0 100%);
+}
+
+/* L 形角标（瞄准镜式 reticle） */
+.corner-bracket {
+  position: relative;
+}
+.corner-bracket::before,
+.corner-bracket::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+}
+.corner-bracket::before {
+  top: -1px;
+  left: -1px;
+  border-top: 1px solid currentColor;
+  border-left: 1px solid currentColor;
+}
+.corner-bracket::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+}
+
+/* 菱形标记（明日方舟 bullet） */
+.diamond {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+/* 细双线分隔 */
+.hairline {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(36, 48, 64, 0.8), transparent);
+}
+
+/* 顶部断点装饰条（非满宽，留缺口） */
+.accent-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 40%;
+}
+
+/* 扫描线 */
+.scanline {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 140px;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(58, 143, 183, 0.05) 40%,
+    rgba(58, 143, 183, 0.12) 50%,
+    rgba(58, 143, 183, 0.05) 60%,
+    transparent
+  );
+}
+
+/* 滚动文字容器：遮罩上下渐隐 */
+.slot-mask {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 18%, #000 32%, #000 68%, transparent 82%);
+  mask-image: linear-gradient(to bottom, transparent 18%, #000 32%, #000 68%, transparent 82%);
+}
+
+/* 滚动中文字抖动 */
+.rolling-text {
+  filter: blur(0.6px);
+  animation: flicker 0.12s steps(2) infinite;
+}
+
+/* 自定义滚动条 */
+.scroll-thin::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: rgba(200, 164, 92, 0.3);
+  border-radius: 3px;
+}
+.scroll-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(200, 164, 92, 0.5);
+}
+
+/* 选中态发光边框 */
+.glow-border {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+}
