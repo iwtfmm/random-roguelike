@@ -23,23 +23,14 @@ export default function ConfigPanel() {
   const setEndingEnabled = useRollStore((s) => s.setEndingEnabled);
 
   return (
-    <>
-      {/* 遮罩 */}
-      <div
-        className={cn(
-          "fixed inset-0 z-30 bg-black/50 backdrop-blur-sm transition-opacity duration-300",
-          open ? "opacity-100" : "pointer-events-none opacity-0",
-        )}
-        onClick={() => toggle(false)}
-      />
-      {/* 抽屉 */}
-      <aside
-        className={cn(
-          "clip-corner fixed right-0 top-0 z-40 flex h-full w-full max-w-lg flex-col border-l border-edge bg-abyss/95 transition-transform duration-300",
-          open ? "translate-x-0" : "translate-x-full",
-        )}
-      >
-        <header className="flex items-center justify-between border-b border-edge px-5 py-4">
+    <aside
+      className={cn(
+        "fixed inset-0 z-40 flex h-full w-full flex-col bg-abyss transition-transform duration-300",
+        open ? "translate-x-0" : "pointer-events-none translate-x-full",
+      )}
+    >
+      <header className="border-b border-edge">
+        <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-5 py-4">
           <div className="flex items-center gap-2">
             <SlidersHorizontal className="h-4 w-4 text-amber" />
             <h2 className="font-display text-base font-bold text-chalk">随机配置</h2>
@@ -50,9 +41,11 @@ export default function ConfigPanel() {
           >
             <X className="h-5 w-5" />
           </button>
-        </header>
+        </div>
+      </header>
 
-        <div className="scroll-thin flex-1 overflow-y-auto px-5 py-4">
+      <div className="scroll-thin flex-1 overflow-y-auto">
+        <div className="mx-auto w-full max-w-3xl px-5 py-4">
           {/* 第一部分：元素开关（关闭则对应界面不显示） */}
           <section className="mb-6">
             <div className="mb-3 flex items-center gap-2 font-mono text-[11px] tracking-widest text-muted">
@@ -140,16 +133,18 @@ export default function ConfigPanel() {
             </div>
           </section>
         </div>
+      </div>
 
-        <footer className="border-t border-edge px-5 py-3">
+      <footer className="border-t border-edge">
+        <div className="mx-auto w-full max-w-3xl px-5 py-3">
           <button
             onClick={() => toggle(false)}
             className="w-full border border-amber/50 bg-amber/10 py-2 font-mono text-xs text-amber transition-colors hover:bg-amber/20"
           >
             完成配置
           </button>
-        </footer>
-      </aside>
-    </>
+        </div>
+      </footer>
+    </aside>
   );
 }
