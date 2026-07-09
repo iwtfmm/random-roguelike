@@ -3,10 +3,14 @@ import react from '@vitejs/plugin-react'
 import tsconfigPaths from "vite-tsconfig-paths";
 import { traeBadgePlugin } from 'vite-plugin-trae-solo-badge';
 
+// GitHub Pages 子路径；本地 dev 与 file:// 打开仍可正常工作
+const repoName = 'random-roguelike';
+const isCI = process.env.GITHUB_ACTIONS === 'true';
+const base = isCI ? `/${repoName}/` : './';
+
 // https://vite.dev/config/
 export default defineConfig({
-  // 相对路径，使 dist 可直接以 file:// 打开或部署到任意子路径
-  base: './',
+  base,
   build: {
     sourcemap: 'hidden',
   },
